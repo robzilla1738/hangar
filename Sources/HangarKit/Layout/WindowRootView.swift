@@ -1,6 +1,5 @@
 // WindowRootView — top-level SwiftUI view for one Hangar window.
-// Renders the pane tree with the terminal filling every cell.
-// Single-pane layouts intentionally render no chrome (Ghostty-style).
+// Composes the WindowOverlayBar (top) with the recursive pane tree.
 
 import AppKit
 import HangarCore
@@ -8,21 +7,30 @@ import SwiftUI
 
 public struct WindowRootView: View {
     @Bindable private var viewModel: WindowViewModel
+    private let overlayBarBuilder: () -> AnyView
 
-    public init(viewModel: WindowViewModel) {
+    public init(
+        viewModel: WindowViewModel,
+        @ViewBuilder overlayBar: @escaping () -> some View = { EmptyView() }
+    ) {
         self.viewModel = viewModel
+        self.overlayBarBuilder = { AnyView(overlayBar()) }
     }
 
     public var body: some View {
-        PaneTreeView(node: viewModel.rootNode) { paneID in
-            AnyView(
-                paneCell(for: paneID)
-            )
+        VStack(spacing: 0) {
+            overlayBarBuilder()
+            paneArea
         }
-        .padding(.top, 28)  // Clears the transparent title bar / traffic-light strip
+        .background(Color(red: 0.05, green: 0.05, blue: 0.07))
+    }
+
+    private var paneArea: some View {
+        PaneTreeView(node: viewModel.rootNode) { paneID in
+            AnyView(paneCell(for: paneID))
+        }
         .padding(.horizontal, 8)
         .padding(.bottom, 8)
-        .background(Color(red: 0.05, green: 0.05, blue: 0.07))
     }
 
     @ViewBuilder
@@ -38,8 +46,6 @@ public struct WindowRootView: View {
 
     @ViewBuilder
     private func focusRingOverlay(active: Bool) -> some View {
-        // Only show the focus ring when there's more than one pane.
-        // Single-pane windows stay completely clean (Ghostty-style).
         if active && viewModel.paneViewModels.count > 1 {
             Rectangle()
                 .strokeBorder(Color.accentColor.opacity(0.6), lineWidth: 1)

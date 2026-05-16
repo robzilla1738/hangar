@@ -1,6 +1,6 @@
 SUPERGOAL_PHASE_START
-Phase: 2 of 9 — B · Title-bar overlay + AppState registry
-Task: Add a custom `WindowOverlayBar` at the top of every Hangar window's content view showing pane title + model badge (left), StatusPill bound to the active pane (center), CostPill + ApprovalInboxBell + Mission Control button (right). Add an AppState `openWindows` registry windows register against, plus shared `ApprovalInbox` and `CostLedger` instances.
+Phase: 2 of 9 — B · Ghostty-clean title-bar + AppState registry
+Task: Add a custom `WindowOverlayBar` at the top of every Hangar window's content view, Ghostty-style: folder icon + cwd path on the LEFT, agent indicators on the right ONLY when something is happening (no permanent buttons, no cost pill, no center cluster). Add an AppState `openWindows` registry plus shared `ApprovalInbox` instance.
 Type: brownfield, ui, integration
 Mandatory commands: swift test, xcodebuild build, xcodebuild test, swiftlint --strict, swift-format lint --recursive --strict Sources Tests Hangar
 Acceptance criteria: 10

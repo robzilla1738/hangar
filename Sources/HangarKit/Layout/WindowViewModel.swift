@@ -8,7 +8,8 @@ import SwiftUI
 
 @MainActor
 @Observable
-public final class WindowViewModel {
+public final class WindowViewModel: Identifiable {
+    public let id = UUID()
     public private(set) var rootNode: PaneNode
     public private(set) var paneViewModels: [UUID: PaneViewModel] = [:]
     public private(set) var activePaneID: UUID

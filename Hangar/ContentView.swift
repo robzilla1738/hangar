@@ -1,5 +1,6 @@
-// Hangar — minimal Ghostty-style content shell.
-// One terminal pane filling the entire window, no chrome.
+// Hangar — content shell. Composes WindowRootView with a Ghostty-clean
+// title-bar overlay (folder + cwd left, agent indicators right when
+// something is happening) and registers the window with AppState.
 
 import HangarCore
 import HangarKit
@@ -7,10 +8,21 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var windowViewModel = WindowViewModel()
+    @Environment(AppState.self) private var appState
 
     var body: some View {
-        WindowRootView(viewModel: windowViewModel)
-            .focusedSceneValue(\.windowViewModel, windowViewModel)
+        WindowRootView(viewModel: windowViewModel) {
+            WindowOverlayBar(
+                cwdPath: appState.cwdPath(in: windowViewModel),
+                activePane: appState.activePane(in: windowViewModel),
+                pendingApprovalCount: appState.pendingApprovalCount
+            ) {
+                appState.approvalInboxPresented.toggle()
+            }
+        }
+        .focusedSceneValue(\.windowViewModel, windowViewModel)
+        .task { appState.registerWindow(windowViewModel) }
+        .onDisappear { appState.unregisterWindow(windowViewModel) }
     }
 }
 
@@ -26,5 +38,5 @@ extension FocusedValues {
 }
 
 #Preview {
-    ContentView()
+    ContentView().environment(AppState())
 }

@@ -50,7 +50,7 @@ public actor ApprovalInbox {
     public private(set) var items: [ApprovalItem] = []
     public let updates: AsyncStream<[ApprovalItem]>
     private let updatesContinuation: AsyncStream<[ApprovalItem]>.Continuation
-    private let inputSink: PaneInputSink
+    private var inputSink: PaneInputSink
 
     public init(inputSink: @escaping PaneInputSink = { _, _ in }) {
         let (stream, continuation) = AsyncStream<[ApprovalItem]>.makeStream()
@@ -58,6 +58,15 @@ public actor ApprovalInbox {
         self.updatesContinuation = continuation
         self.inputSink = inputSink
         continuation.yield([])
+    }
+
+    /// Replace the PaneInputSink after construction.
+    ///
+    /// Used by AppState to break the cycle: the inbox is created in AppState's
+    /// init, then the sink is set to a closure that calls back into AppState's
+    /// MainActor-isolated writeToPane.
+    public func setInputSink(_ sink: @escaping PaneInputSink) {
+        self.inputSink = sink
     }
 
     deinit {
