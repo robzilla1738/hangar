@@ -1,0 +1,12 @@
+* text=auto eol=lf
+
+*.swift   text diff=swift
+*.png     binary
+*.icns    binary
+*.dmg     binary
+*.p12     binary
+*.pem     binary
+*.zip     binary
+
+# Xcode generated; do not diff
+*.pbxproj merge=union

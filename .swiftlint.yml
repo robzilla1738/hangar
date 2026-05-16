@@ -1,0 +1,99 @@
+# SwiftLint configuration for Hangar
+# Run: swiftlint --strict
+
+included:
+  - Sources
+  - Tests
+  - Hangar
+
+excluded:
+  - .build
+  - .swiftpm
+  - DerivedData
+  - Packages
+  - .supergoal
+
+disabled_rules:
+  - todo                          # we'll grep TODOs in CI separately
+
+opt_in_rules:
+  - array_init
+  - closure_end_indentation
+  - closure_spacing
+  - collection_alignment
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - contains_over_range_nil_comparison
+  - empty_collection_literal
+  - empty_count
+  - empty_string
+  - explicit_init
+  - fatal_error_message
+  - first_where
+  - implicitly_unwrapped_optional
+  - joined_default_parameter
+  - last_where
+  - literal_expression_end_indentation
+  - multiline_arguments
+  - multiline_parameters
+  - operator_usage_whitespace
+  - overridden_super_call
+  - prohibited_super_call
+  - redundant_nil_coalescing
+  - redundant_type_annotation
+  - sorted_first_last
+  - toggle_bool
+  - trailing_closure
+  - unneeded_parentheses_in_closure_argument
+  - vertical_parameter_alignment_on_call
+  - yoda_condition
+  - force_unwrapping
+
+analyzer_rules:
+  - unused_import
+
+line_length:
+  warning: 120
+  error: 140
+  ignores_comments: true
+  ignores_urls: true
+
+trailing_comma:
+  mandatory_comma: true
+
+function_body_length:
+  warning: 60
+  error: 100
+
+file_length:
+  warning: 500
+  error: 750
+
+type_body_length:
+  warning: 300
+  error: 400
+
+cyclomatic_complexity:
+  warning: 12
+  error: 18
+
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  excluded:
+    - id
+    - x
+    - y
+    - i
+    - j
+    - k
+    - to
+    - fd
+
+force_cast: error
+force_try: error
+force_unwrapping: warning
+
+reporter: "xcode"

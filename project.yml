@@ -1,0 +1,113 @@
+name: Hangar
+options:
+  bundleIdPrefix: dev.robcourson
+  developmentLanguage: en
+  deploymentTarget:
+    macOS: "15.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    DEVELOPMENT_TEAM: 9F2JXY8TCK
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+    ENABLE_HARDENED_RUNTIME: YES
+    CODE_SIGN_STYLE: Manual
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
+    GCC_TREAT_WARNINGS_AS_ERRORS: NO
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+packages:
+  HangarCore:
+    path: .
+  HangarKit:
+    path: .
+  SwiftTerm:
+    url: https://github.com/migueldeicaza/SwiftTerm
+    from: "1.2.0"
+  GRDB:
+    url: https://github.com/groue/GRDB.swift
+    from: "7.0.0"
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.6.0"
+
+targets:
+  Hangar:
+    type: application
+    platform: macOS
+    sources:
+      - path: Hangar
+        excludes:
+          - "Hangar.entitlements"
+    resources:
+      - path: Hangar/Assets.xcassets
+      - path: Hangar/Resources
+        optional: true
+    info:
+      path: Hangar/Info.plist
+      properties:
+        CFBundleDisplayName: Hangar
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
+        LSApplicationCategoryType: public.app-category.developer-tools
+        NSHumanReadableCopyright: "© 2026 Robert Courson and Hangar contributors. MIT License."
+        NSPrincipalClass: NSApplication
+        NSHighResolutionCapable: true
+        CFBundleURLTypes:
+          - CFBundleURLName: dev.robcourson.hangar
+            CFBundleURLSchemes:
+              - hangar
+        SUPublicEDKey: ""
+        SUFeedURL: "https://github.com/robzilla1738/hangar/releases/latest/download/appcast.xml"
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
+        NSAppleEventsUsageDescription: "Hangar uses Apple Events for AppleScript / Shortcuts integration."
+    entitlements:
+      path: Hangar/Hangar.entitlements
+      properties:
+        com.apple.security.cs.allow-jit: true
+        com.apple.security.cs.disable-library-validation: true
+        com.apple.security.cs.allow-unsigned-executable-memory: true
+        com.apple.security.cs.allow-dyld-environment-variables: true
+        com.apple.security.cs.disable-executable-page-protection: false
+        com.apple.security.automation.apple-events: true
+        com.apple.security.device.audio-input: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.robcourson.hangar
+        PRODUCT_NAME: Hangar
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_ENTITLEMENTS: Hangar/Hangar.entitlements
+    dependencies:
+      - package: HangarCore
+        product: HangarCore
+      - package: HangarKit
+        product: HangarKit
+      - package: SwiftTerm
+        product: SwiftTerm
+      - package: Sparkle
+        product: Sparkle
+    scheme:
+      testTargets:
+        - HangarTests
+      gatherCoverageData: true
+
+  HangarTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/HangarTests
+    dependencies:
+      - target: Hangar
+    settings:
+      base:
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Hangar.app/Contents/MacOS/Hangar"

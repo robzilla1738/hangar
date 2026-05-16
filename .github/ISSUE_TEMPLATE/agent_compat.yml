@@ -1,0 +1,35 @@
+name: Agent compatibility issue
+description: An agent CLI Hangar mis-detects or whose prompts/output Hangar doesn't parse correctly
+labels: [agent-compat]
+body:
+  - type: input
+    id: agent
+    attributes:
+      label: Agent CLI
+      description: Binary name + provider, e.g. "claude (Anthropic)", "codex (OpenAI)", "hermes (Nous)"
+    validations:
+      required: true
+  - type: input
+    id: agent-version
+    attributes:
+      label: Agent CLI version
+      placeholder: "claude --version output"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong?
+      description: |
+        Examples: wrong profile detected; approval prompt not caught; cost parser undercounts;
+        status pill stuck on "thinking" when agent is idle.
+    validations:
+      required: true
+  - type: textarea
+    id: fixture
+    attributes:
+      label: Recorded fixture (ideal)
+      description: |
+        Capture with: `script -q -t 0 fixture.ansi -c "<your command>"`. Paste the raw bytes
+        below (or attach the file).
+      render: shell

@@ -1,0 +1,57 @@
+# Xcode
+*.xcodeproj/**/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+DerivedData/
+build/
+dist/
+*.xcarchive/
+
+# Swift Package Manager
+.swiftpm/
+.build/
+Packages/
+Package.pins
+Package.resolved
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Editors
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Secrets (NEVER commit)
+~/.config/hangar-secrets/
+secrets/
+*.p12
+*.cer
+*.mobileprovision
+ExportOptions.plist
+
+# Generated artifacts
+*.dmg
+appcast.xml.sig
+ResultBundle_*.xcresult
+
+# Notarization / build scripts intermediates
+notarization.log
+codesign.log
+
+# Coverage / profiling
+*.profraw
+coverage/
+*.gcda
+*.gcno
+
+# Hangar runtime data (should not be in repo if dev cwd is the repo)
+~/.config/hangar/
+~/Hangar/Worktrees/

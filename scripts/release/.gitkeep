@@ -1,0 +1,7 @@
+# Release scripts live here. Implemented in Phase 13.
+# Required files (not yet created):
+#   import-cert.sh
+#   build-release.sh
+#   notarize.sh
+#   build-dmg.sh
+#   build-appcast.sh
