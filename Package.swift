@@ -19,7 +19,9 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/migueldeicaza/SwiftTerm", from: "1.2.0"),
         .package(url: "https://github.com/groue/GRDB.swift", from: "7.0.0"),
-        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.6.0"),
+        // Sparkle is wired via the Xcode app target (project.yml), not the SPM
+        // library modules — keeping it out of Package.swift silences an
+        // "unused dependency" warning during `swift build`.
     ],
     targets: [
         .target(

@@ -14,6 +14,7 @@ struct HangarApp: App {
             ContentView()
                 .environment(appState)
                 .frame(minWidth: 720, minHeight: 480)
+                .task { await appState.bootstrapConfig() }
         }
         .commands {
             CommandGroup(replacing: .appInfo) {
@@ -28,6 +29,10 @@ struct HangarApp: App {
                 .keyboardShortcut("n", modifiers: [.command])
             }
         }
+
+        Settings {
+            SettingsView(config: appState.config)
+        }
     }
 }
 
@@ -36,4 +41,27 @@ struct HangarApp: App {
 final class AppState {
     var version: String { HangarCore.version }
     var greeting: String { "Hangar v\(version) — agentic terminal foundation" }
+    var config: HangarConfig = .defaults
+
+    private let configStore = ConfigStore()
+    private var bootstrapped = false
+
+    func bootstrapConfig() async {
+        guard !bootstrapped else { return }
+        bootstrapped = true
+        do {
+            let snapshot = try await configStore.load()
+            self.config = snapshot
+            try await configStore.watch()
+            Task { [weak self] in
+                guard let self else { return }
+                let stream = await self.configStore.changes
+                for await snapshot in stream {
+                    await MainActor.run { self.config = snapshot }
+                }
+            }
+        } catch {
+            // Keep defaults if we can't read the file; Phase 11 will banner.
+        }
+    }
 }
