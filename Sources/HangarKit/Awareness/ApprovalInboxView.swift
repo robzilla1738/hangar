@@ -70,7 +70,7 @@ public struct ApprovalInboxView: View {
     private var list: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(items) { item in
-                ApprovalRow(item: item, onAction: { onAction(item.id, $0) })
+                ApprovalRow(item: item) { onAction(item.id, $0) }
                 if item.id != items.last?.id {
                     Divider()
                 }
