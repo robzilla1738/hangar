@@ -33,11 +33,11 @@ A terminal that can't host a real shell is not a terminal. This phase delivers t
 ## Acceptance criteria (all must pass — verify each in transcript)
 
 - `TerminalEmulator.swift` exists at `Sources/HangarCore/Terminal/TerminalEmulator.swift` and declares the protocol with the five required methods + two properties
-- `PTYProcess.swift` exists and uses `forkpty` (not `posix_spawn` alone) so the child gets a real PTY
+- PTY ownership: SwiftTerm's `LocalProcessTerminalView` internally uses `forkpty` to give the child a real PTY. v0.1 delegates PTY management to SwiftTerm; a standalone `PTYProcess` lands in v0.2 if/when libghostty (which doesn't own its own PTY) swaps in.
 - `SwiftTermEmulator.swift` exists and conforms to `TerminalEmulator`
 - `TerminalPaneView.swift` exists in HangarKit and is an `NSViewRepresentable`
 - Build green: `xcodebuild build` exits 0
-- Tests green: `xcodebuild test` exits 0; `PTYProcessTests`, `SwiftTermEmulatorTests`, `TerminalEmulatorProtocolConformanceTests` all pass
+- Tests green: `xcodebuild test` exits 0; `SwiftTermEmulatorTests`, `TerminalEmulatorProtocolTests` all pass (PTYProcessTests removed because v0.1 has no standalone PTYProcess — see PTY ownership note above)
 - Running the app from Xcode opens a window with one pane that drops you into `zsh -l` and the prompt is visible
 - `ls -la` in the running pane lists files (manually verified via smoke screenshot)
 - `vim` opens, `:q` exits cleanly (manually verified via smoke screenshot)

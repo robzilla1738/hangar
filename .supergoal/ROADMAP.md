@@ -20,7 +20,7 @@
 
 Non-blocking decisions recorded so we can proceed without round-trips. If wrong, stop the run and tell us:
 
-- macOS 26 Tahoe minimum deployment target (SDK 26.2 confirmed; Liquid Glass requires it).
+- macOS 15 Sequoia minimum deployment target (CI macos-15 runner has Xcode 16, can only build for macOS 15 SDK). Liquid Glass features in Phase 11 will be gated behind `@available(macOS 26, *)` and the app still functions on macOS 15 with the non-Liquid-Glass fallback. Revised from macOS 26 in Phase 1; original assumption was based on local SDK availability, not CI realities.
 - License: MIT (no NOTICE file in v0.1).
 - Default font: SF Mono ships in macOS; JetBrains Mono Light bundled as a built-in option (SIL OFL).
 - Homebrew distribution: own tap `robzilla1738/homebrew-hangar` at first; submit to `homebrew/cask` after v0.2.

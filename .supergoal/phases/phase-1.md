@@ -56,7 +56,7 @@ Every later phase depends on a green-building project skeleton and a public repo
 - `swiftlint --strict` exits 0
 - `swift-format lint --recursive --strict Sources Tests Hangar` exits 0
 - Bundle identifier in `Hangar.xcodeproj` is `dev.robcourson.hangar`
-- Deployment target is `macOS 26.0` (verifiable via `xcodebuild -showBuildSettings -scheme Hangar | grep MACOSX_DEPLOYMENT_TARGET`)
+- Deployment target is `macOS 15.0` (revised from 26.0 — CI macos-15 runner has Xcode 16 which only supports macOS 15 SDK; Liquid Glass features land in Phase 11 behind `@available(macOS 26, *)` so app still works on 15 and gets the full chrome on 26+). Verifiable via `xcodebuild -showBuildSettings -scheme Hangar | grep MACOSX_DEPLOYMENT_TARGET`
 - Hardened runtime entitlements file exists at `Hangar/Hangar.entitlements` and contains `com.apple.security.cs.allow-jit` and `com.apple.security.cs.disable-library-validation`
 - `Package.swift` declares SwiftTerm, GRDB.swift, and Sparkle as dependencies
 - `.gitignore` excludes `DerivedData/`, `.swiftpm/`, `*.xcuserdata*`, `.DS_Store`

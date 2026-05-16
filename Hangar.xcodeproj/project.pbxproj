@@ -36,7 +36,7 @@
 		C18B8D45A99B2B02CFA15909 /* HangarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HangarApp.swift; sourceTree = "<group>"; };
 		E6C3A11DA4E6B153BEAFE776 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		EFF64804612E015B5503BA68 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		"TEMP_BCA7FE59-1E74-4C90-8F88-2DE1C063728E" /* terminal */ = {isa = PBXFileReference; lastKnownFileType = folder; name = terminal; path = .; sourceTree = SOURCE_ROOT; };
+		"TEMP_7C5A0709-C1FF-4E0D-B61A-4ED054FFCD14" /* terminal */ = {isa = PBXFileReference; lastKnownFileType = folder; name = terminal; path = .; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
