@@ -1,7 +1,7 @@
 # State: Hangar v0.2.0 — visible agent orchestration
 
 **Status:** IN_PROGRESS
-**Current phase:** 2
+**Current phase:** 5
 **Started:** 2026-05-16
 **Last update:** 2026-05-16
 **Baseline ref:** 0019939aed44d32e16568864a1f65191f568b58c
@@ -11,9 +11,9 @@
 | # | Phase | Status | Started | Completed | Notes |
 |---|-------|--------|---------|-----------|-------|
 | 1 | A · Output wiring + ShellCommandDetector | completed | 2026-05-16 13:45 | 2026-05-16 13:53 | 12 new tests pass; protocol gained outputStream; PaneViewModel observes + classifies |
-| 2 | B · Title-bar overlay + AppState registry | pending | — | — | — |
-| 3 | C · Approval routing end-to-end | pending | — | — | — |
-| 4 | D · Cost wiring | pending | — | — | — |
+| 2 | B · Ghostty-clean title-bar + AppState registry | completed | 2026-05-16 13:54 | 2026-05-16 14:08 | Cost pill removed per user; agent indicators only when active; clean Ghostty-aesthetic |
+| 3 | C · Approval routing end-to-end | completed | 2026-05-16 14:09 | 2026-05-16 14:18 | Adapter pattern; Debug menu injects; bell badge appears live; popover wired |
+| 4 | ~~D · Cost wiring~~ | DROPPED | — | — | Removed per user feedback; spec archived |
 | 5 | E · Mission Control (Cmd-0) | pending | — | — | — |
 | 6 | F · Left sidebar (projects + worktrees) | pending | — | — | — |
 | 7 | G · Right sidecar (diff) | pending | — | — | — |

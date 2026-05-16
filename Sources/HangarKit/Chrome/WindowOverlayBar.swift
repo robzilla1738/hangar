@@ -19,18 +19,27 @@ public struct WindowOverlayBar: View {
     private let cwdPath: String?
     private let activePane: PaneViewModel?
     private let pendingApprovalCount: Int
+    private let approvalItems: [ApprovalItem]
+    @Binding private var popoverPresented: Bool
     private let onBellTap: () -> Void
+    private let onApprovalAction: (UUID, ApprovalAction) -> Void
 
     public init(
         cwdPath: String?,
         activePane: PaneViewModel?,
         pendingApprovalCount: Int,
-        onBellTap: @escaping () -> Void = {}
+        approvalItems: [ApprovalItem] = [],
+        popoverPresented: Binding<Bool> = .constant(false),
+        onBellTap: @escaping () -> Void = {},
+        onApprovalAction: @escaping (UUID, ApprovalAction) -> Void = { _, _ in }
     ) {
         self.cwdPath = cwdPath
         self.activePane = activePane
         self.pendingApprovalCount = pendingApprovalCount
+        self.approvalItems = approvalItems
+        self._popoverPresented = popoverPresented
         self.onBellTap = onBellTap
+        self.onApprovalAction = onApprovalAction
     }
 
     public var body: some View {
@@ -73,9 +82,17 @@ public struct WindowOverlayBar: View {
                 .transition(.opacity)
             }
 
-            if pendingApprovalCount > 0 {
-                ApprovalInboxBell(pendingCount: pendingApprovalCount, onTap: onBellTap)
-                    .transition(.opacity)
+            ZStack(alignment: .trailing) {
+                // Invisible anchor so the popover has somewhere to attach
+                // even when the bell badge is hidden.
+                Color.clear.frame(width: 1, height: 1)
+                if pendingApprovalCount > 0 {
+                    ApprovalInboxBell(pendingCount: pendingApprovalCount, onTap: onBellTap)
+                        .transition(.opacity)
+                }
+            }
+            .popover(isPresented: $popoverPresented, arrowEdge: .top) {
+                ApprovalInboxView(items: approvalItems, onAction: onApprovalAction)
             }
         }
         .animation(.easeInOut(duration: 0.18), value: pendingApprovalCount)

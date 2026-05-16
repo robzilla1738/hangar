@@ -53,6 +53,23 @@ struct HangarApp: App {
                 }
                 .keyboardShortcut("w", modifiers: [.command])
                 .disabled(focusedWindow == nil)
+
+                Divider()
+
+                Button("Approval Inbox") {
+                    appState.approvalInboxPresented.toggle()
+                }
+                .keyboardShortcut("a", modifiers: [.command, .shift])
+            }
+
+            CommandMenu("Debug") {
+                Button("Inject Fake Approval") {
+                    appState.injectDebugApproval()
+                }
+                Divider()
+                Button("Clear Inbox") {
+                    Task { await appState.approvalInbox.clearResolved() }
+                }
             }
         }
 
@@ -116,8 +133,12 @@ final class AppState {
     private var bootstrapped = false
 
     init() {
-        self.approvalInbox = ApprovalInbox()
-        self.costLedger = CostLedger()
+        let inbox = ApprovalInbox()
+        let ledger = CostLedger()
+        let notifier = NotificationCenterService()
+        self.approvalInbox = inbox
+        self.costLedger = ledger
+        self.awareness = AwarenessAdapter(approvalInbox: inbox, notificationService: notifier)
     }
 
     /// Run-once startup: config, awareness wiring, notification authorization.
@@ -126,9 +147,18 @@ final class AppState {
         bootstrapped = true
 
         await wireApprovalInputSink()
+        await notificationService.requestAuthorization()
         startApprovalCountSubscription()
         await bootstrapConfig()
     }
+
+    let notificationService = NotificationCenterService()
+
+    /// Single AwarenessAdapter shared by every pane in every window.
+    @ObservationIgnored let awareness: AwarenessAdapter
+
+    /// Latest snapshot of inbox items for popover rendering.
+    var approvalItems: [ApprovalItem] = []
 
     private func bootstrapConfig() async {
         do {
@@ -160,9 +190,36 @@ final class AppState {
         Task { [weak self] in
             for await items in await inbox.updates {
                 let pending = items.filter { $0.state == .pending }.count
-                await MainActor.run { self?.pendingApprovalCount = pending }
+                await MainActor.run {
+                    self?.pendingApprovalCount = pending
+                    self?.approvalItems = items
+                }
             }
         }
+    }
+
+    /// Respond to an approval item and let the inbox actor route the
+    /// keystroke back to the originating pane via the configured sink.
+    func respondToApproval(itemID: UUID, action: ApprovalAction) {
+        let inbox = approvalInbox
+        Task {
+            await inbox.respond(itemID: itemID, action: action)
+        }
+    }
+
+    /// Inject a synthetic approval item — used by Debug menu and tests
+    /// to verify the routing without needing a live agent.
+    func injectDebugApproval() {
+        guard let firstPane = openWindows.values.first?.paneViewModels.values.first else {
+            return
+        }
+        let item = ApprovalItem(
+            paneID: firstPane.id,
+            agentID: firstPane.detectedAgentID ?? "debug",
+            prompt: "Run `rm -rf node_modules` ? [debug-injected]"
+        )
+        awareness.report(item, agentDisplayName: "Debug")
+        approvalInboxPresented = true
     }
 
     /// Find a pane across all open windows and write text to its emulator.
@@ -193,6 +250,7 @@ final class AppState {
 
     func registerWindow(_ window: WindowViewModel) {
         openWindows[window.id] = window
+        window.bindAwareness(awareness)
     }
 
     func unregisterWindow(_ window: WindowViewModel) {

@@ -10,9 +10,19 @@ import UserNotifications
 public actor NotificationCenterService {
     public static let approvalCategoryID = "HANGAR_APPROVAL"
 
-    public init() {}
+    /// Whether to actually call UNUserNotificationCenter. False when running
+    /// from `swift test` (no app bundle), true when running from a .app.
+    private let enabled: Bool
+
+    public init() {
+        // The host process must be a packaged .app for UNUserNotificationCenter
+        // to initialize. `swift test` runs out of /usr/bin so the bundle's
+        // pathExtension is empty.
+        self.enabled = Bundle.main.bundleURL.pathExtension == "app"
+    }
 
     public func requestAuthorization() async {
+        guard enabled else { return }
         do {
             _ = try await UNUserNotificationCenter.current()
                 .requestAuthorization(options: [.alert, .sound, .badge])
@@ -23,6 +33,7 @@ public actor NotificationCenterService {
     }
 
     public func notifyApproval(agentName: String, prompt: String) async {
+        guard enabled else { return }
         let content = UNMutableNotificationContent()
         content.title = "Hangar — \(agentName) needs approval"
         content.body = String(prompt.prefix(180))
@@ -37,6 +48,7 @@ public actor NotificationCenterService {
     }
 
     private func registerCategories() async {
+        guard enabled else { return }
         let approve = UNNotificationAction(
             identifier: "HANGAR_APPROVE",
             title: "Approve",

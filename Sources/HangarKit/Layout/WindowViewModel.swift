@@ -28,6 +28,7 @@ public final class WindowViewModel: Identifiable {
     public func splitActive(orientation: SplitOrientation) {
         let newPaneID = UUID()
         let vm = PaneViewModel(emulator: SwiftTermEmulator(), autostart: .zshLogin)
+        vm.awareness = boundAwareness
         paneViewModels[newPaneID] = vm
         rootNode = rootNode.splitting(
             paneID: activePaneID,
@@ -55,4 +56,16 @@ public final class WindowViewModel: Identifiable {
         guard paneViewModels[id] != nil else { return }
         activePaneID = id
     }
+
+    /// Inject the awareness adapter into every existing pane and remember it
+    /// so future panes (added by splits) inherit the same adapter.
+    public func bindAwareness(_ adapter: AwarenessAdapter) {
+        boundAwareness = adapter
+        for pane in paneViewModels.values {
+            pane.awareness = adapter
+        }
+    }
+
+    /// Awareness adapter applied to panes created after `bindAwareness`.
+    @ObservationIgnored private var boundAwareness: AwarenessAdapter?
 }

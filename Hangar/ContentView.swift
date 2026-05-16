@@ -11,14 +11,19 @@ struct ContentView: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
-        WindowRootView(viewModel: windowViewModel) {
+        @Bindable var bindableState = appState
+        return WindowRootView(viewModel: windowViewModel) {
             WindowOverlayBar(
                 cwdPath: appState.cwdPath(in: windowViewModel),
                 activePane: appState.activePane(in: windowViewModel),
-                pendingApprovalCount: appState.pendingApprovalCount
-            ) {
-                appState.approvalInboxPresented.toggle()
-            }
+                pendingApprovalCount: appState.pendingApprovalCount,
+                approvalItems: appState.approvalItems,
+                popoverPresented: $bindableState.approvalInboxPresented,
+                onBellTap: { appState.approvalInboxPresented.toggle() },
+                onApprovalAction: { itemID, action in
+                    appState.respondToApproval(itemID: itemID, action: action)
+                }
+            )
         }
         .focusedSceneValue(\.windowViewModel, windowViewModel)
         .task { appState.registerWindow(windowViewModel) }

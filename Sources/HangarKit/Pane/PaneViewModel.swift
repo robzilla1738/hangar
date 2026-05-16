@@ -35,6 +35,12 @@ public final class PaneViewModel: Identifiable {
     @ObservationIgnored private var parser: any AgentOutputParser = NoopAgentParser()
     @ObservationIgnored private var observationTask: Task<Void, Never>?
 
+    /// Bridge from this pane into the app-level approval inbox + notifications.
+    ///
+    /// Set by `WindowViewModel.bindAwareness` once the window is registered
+    /// with AppState. Nil during tests or before the window is bound.
+    @ObservationIgnored public var awareness: AwarenessAdapter?
+
     public init(
         emulator: TerminalEmulator = SwiftTermEmulator(),
         autostart config: TerminalStartConfig? = .zshLogin
@@ -103,9 +109,9 @@ public final class PaneViewModel: Identifiable {
             currentStatus = status
         case .approvalPrompt(let prompt):
             let agentID = detectedAgentID ?? "unknown"
-            pendingApprovals.append(
-                ApprovalItem(paneID: id, agentID: agentID, prompt: prompt)
-            )
+            let item = ApprovalItem(paneID: id, agentID: agentID, prompt: prompt)
+            pendingApprovals.append(item)
+            awareness?.report(item, agentDisplayName: detectedAgentDisplayName)
         case .tokenUsage(let input, let output, let cached):
             let modelName = model ?? "unknown"
             let provider = providerFromCurrentAgent()
