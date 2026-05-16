@@ -10,8 +10,10 @@ import UserNotifications
 public actor NotificationCenterService {
     public static let approvalCategoryID = "HANGAR_APPROVAL"
 
-    /// Whether to actually call UNUserNotificationCenter. False when running
-    /// from `swift test` (no app bundle), true when running from a .app.
+    /// Whether to actually call UNUserNotificationCenter.
+    ///
+    /// False when running from `swift test` (no app bundle), true when
+    /// running from a .app.
     private let enabled: Bool
 
     public init() {
