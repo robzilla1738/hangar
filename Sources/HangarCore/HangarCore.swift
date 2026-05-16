@@ -10,10 +10,10 @@ public enum HangarCore {
     /// Marketing version string.
     ///
     /// Reflected in the cost pill tooltip and the About panel.
-    public static let version = "0.1.0-dev"
+    public static let version = "0.1.1"
 
     /// Build identifier baked into binaries.
     ///
     /// Refined in Phase 13 from CI.
-    public static let buildIdentifier = "phase-1-bootstrap"
+    public static let buildIdentifier = "v0.1.1"
 }

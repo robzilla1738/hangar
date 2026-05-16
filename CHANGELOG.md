@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Hangar 
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-05-16
+
+### Fixed
+
+- **Terminal now renders on launch.** v0.1.0 shipped with a broken view hierarchy where the SwiftTerm NSView never appeared and the window opened empty. Fixed by wrapping the terminal NSView in a `TerminalHostView` container that pins the child to its bounds and grabs first responder when the window appears, so keystrokes are accepted immediately.
+- Clean Ghostty-style window chrome: transparent title bar, traffic lights have their own strip, terminal sits in a padded content area below.
+- Window opens at a sensible 960×600 centered on screen rather than at the SwiftUI default.
+
 ### Added
 
 - Initial v0.1 scaffolding: Xcode project, two SPM modules (`HangarCore`, `HangarKit`), CI pipeline, governance docs.

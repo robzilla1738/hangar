@@ -1,5 +1,6 @@
 // WindowRootView — top-level SwiftUI view for one Hangar window.
-// Renders the pane tree and routes focus from clicks back to the WindowViewModel.
+// Renders the pane tree with the terminal filling every cell.
+// Single-pane layouts intentionally render no chrome (Ghostty-style).
 
 import AppKit
 import HangarCore
@@ -18,7 +19,10 @@ public struct WindowRootView: View {
                 paneCell(for: paneID)
             )
         }
-        .background(.windowBackground)
+        .padding(.top, 28)  // Clears the transparent title bar / traffic-light strip
+        .padding(.horizontal, 8)
+        .padding(.bottom, 8)
+        .background(Color(red: 0.05, green: 0.05, blue: 0.07))
     }
 
     @ViewBuilder
@@ -34,9 +38,11 @@ public struct WindowRootView: View {
 
     @ViewBuilder
     private func focusRingOverlay(active: Bool) -> some View {
-        if active {
-            RoundedRectangle(cornerRadius: 2)
-                .strokeBorder(Color.accentColor.opacity(0.75), lineWidth: 1)
+        // Only show the focus ring when there's more than one pane.
+        // Single-pane windows stay completely clean (Ghostty-style).
+        if active && viewModel.paneViewModels.count > 1 {
+            Rectangle()
+                .strokeBorder(Color.accentColor.opacity(0.6), lineWidth: 1)
                 .allowsHitTesting(false)
         } else {
             EmptyView()

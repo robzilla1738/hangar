@@ -7,7 +7,7 @@ import XCTest
 @MainActor
 final class HangarKitTests: XCTestCase {
     func testVersionMatchesCore() {
-        XCTAssertEqual(HangarKit.version, "0.1.0-dev", "HangarKit.version should track HangarCore.version")
+        XCTAssertEqual(HangarKit.version, "0.1.1", "HangarKit.version should track HangarCore.version")
     }
 
     func testBackgroundSurfaceConstructs() {

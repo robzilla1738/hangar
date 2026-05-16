@@ -1,4 +1,5 @@
-// Hangar — content shell. Phase 4 wires WindowRootView with splittable panes.
+// Hangar — minimal Ghostty-style content shell.
+// One terminal pane filling the entire window, no chrome.
 
 import HangarCore
 import HangarKit
@@ -9,12 +10,10 @@ struct ContentView: View {
 
     var body: some View {
         WindowRootView(viewModel: windowViewModel)
-            .ignoresSafeArea()
             .focusedSceneValue(\.windowViewModel, windowViewModel)
     }
 }
 
-/// FocusedSceneValue plumbing so Commands can reach the active window's view model.
 struct WindowViewModelFocusKey: FocusedValueKey {
     typealias Value = WindowViewModel
 }

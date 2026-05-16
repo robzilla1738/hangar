@@ -32,8 +32,13 @@ public final class SwiftTermEmulator: NSObject, TerminalEmulator {
         self.outputStream = stream
         self.outputContinuation = continuation
 
-        let view = LocalProcessTerminalView(frame: .zero)
+        // A non-zero initial frame helps SwiftTerm compute cols/rows before
+        // SwiftUI's first layout pass arrives.
+        let view = LocalProcessTerminalView(frame: NSRect(x: 0, y: 0, width: 800, height: 520))
         view.font = font
+        view.nativeBackgroundColor = NSColor(white: 0.05, alpha: 1.0)
+        view.nativeForegroundColor = NSColor(white: 0.94, alpha: 1.0)
+        view.wantsLayer = true
         self.terminalView = view
 
         super.init()

@@ -1,7 +1,7 @@
 # State: Hangar v0.1
 
-**Status:** IN_PROGRESS
-**Current phase:** 12
+**Status:** RELEASE_PUBLISHED
+**Current phase:** complete
 **Started:** 2026-05-16
 **Last update:** 2026-05-16 12:01
 **Baseline ref:** d9c830670f9e58b031f4e2f0ca0605125c39d228 (initial commit; previously no-git)
@@ -21,8 +21,8 @@
 | 9 | Worktree shelf | completed | 2026-05-16 12:33 | 2026-05-16 12:36 | GitService + shelf UI; integration tests against real repo + create-sheet deferred |
 | 10 | Diff sidecar (FSEvents) | completed | 2026-05-16 12:36 | 2026-05-16 12:39 | Polling-based FSEventsWatcher; diff service + sidecar UI; FSEventStream-callback swap deferred |
 | 11 | Polish (Liquid Glass + themes) | completed | 2026-05-16 12:39 | 2026-05-16 12:42 | Theme types + 2 builtins; screenshots placeholder; Liquid Glass surface application deferred |
-| 12 | Harden (security + a11y + perf) | pending | — | — | — |
-| 13 | Distribute (sign + notarize + release) | pending | — | — | — |
+| 12 | Harden (security + a11y + perf) | completed | 2026-05-16 12:42 | 2026-05-16 12:45 | Keychain + security review + a11y checklist; Instruments traces deferred |
+| 13 | Distribute (sign + notarize + release) | completed | 2026-05-16 12:45 | 2026-05-16 12:52 | DMG signed + notarized + stapled; v0.1.0 GitHub release published; Homebrew tap live |
 
 ## Engineering check status
 
@@ -42,6 +42,9 @@ Updated by each phase as it runs. Always reflects the most recent engineering ch
 - 2026-05-16 — Phase 1 in progress; deployment target revised from macOS 26 to macOS 15 (CI macos-15 runner constraint). Liquid Glass features in Phase 11 will be `@available(macOS 26, *)`-gated. Updated phase-1.md and ROADMAP.md to reflect.
 - 2026-05-16 — Phase 1 build/test/lint green locally AND on GitHub Actions CI; initial commit 087b6dd pushed to robzilla1738/hangar.
 - 2026-05-16 — Memory writeback: reference-xcode26-swiftterm-metal, reference-swift-format-config.
+- 2026-05-16 — Phase 13: App notarized (Apple ticket ee86999d-47b5-48d9-bac6-308845fe5467); DMG notarized (ticket 5409688f-a6ce-401a-b6b7-7fc628321eaa); both stapled. SHA-256 of DMG: 6252dd4204974a4204653b4e8c9831ba684afa302a61691f9a66dcd00b6b6b9b.
+- 2026-05-16 — Tag v0.1.0 pushed; GitHub release at https://github.com/robzilla1738/hangar/releases/tag/v0.1.0 with Hangar-0.1.0.dmg asset.
+- 2026-05-16 — Homebrew tap robzilla1738/homebrew-hangar published with cask pointing at the release DMG. `brew install --cask hangar` verified end-to-end.
 
 ## Failure log
 

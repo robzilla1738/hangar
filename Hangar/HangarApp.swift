@@ -14,9 +14,11 @@ struct HangarApp: App {
         WindowGroup("Hangar", id: "main") {
             ContentView()
                 .environment(appState)
-                .frame(minWidth: 720, minHeight: 480)
+                .frame(minWidth: 720, minHeight: 420)
                 .task { await appState.bootstrapConfig() }
+                .background(WindowConfigurator())
         }
+        .windowResizability(.contentSize)
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About Hangar") {
@@ -25,7 +27,9 @@ struct HangarApp: App {
             }
             CommandGroup(replacing: .newItem) {
                 Button("New Window") {
-                    openNewWindow()
+                    if let url = URL(string: "hangar://new-window") {
+                        NSWorkspace.shared.open(url)
+                    }
                 }
                 .keyboardShortcut("n", modifiers: [.command])
             }
@@ -56,14 +60,41 @@ struct HangarApp: App {
             SettingsView(config: appState.config)
         }
     }
+}
 
-    private func openNewWindow() {
-        // SwiftUI's WindowGroup handles Cmd-N via the default newItem command;
-        // we replaced .newItem to ensure both the menu and shortcut work.
-        if let url = URL(string: "hangar://new-window") {
-            NSWorkspace.shared.open(url)
+/// Configures the host NSWindow with a clean Ghostty-style title bar.
+///
+/// Dark window background, transparent title bar with full-size content,
+/// hidden title text. Traffic lights sit in their own ~28pt strip; the
+/// terminal padding inside the content view keeps the prompt clear of
+/// the buttons.
+private struct WindowConfigurator: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            guard let window = view.window else { return }
+            window.titlebarAppearsTransparent = true
+            window.titleVisibility = .hidden
+            window.backgroundColor = NSColor(red: 0.05, green: 0.05, blue: 0.07, alpha: 1.0)
+            window.isMovableByWindowBackground = false
+            window.toolbarStyle = .unified
+            // Sensible default size so the terminal has room to breathe
+            // without the user needing to resize on first launch.
+            if window.frame.size.width < 900 || window.frame.size.height < 560 {
+                let screen = window.screen ?? NSScreen.main
+                let visible = screen?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+                let size = NSSize(width: 960, height: 600)
+                let origin = NSPoint(
+                    x: visible.midX - size.width / 2,
+                    y: visible.midY - size.height / 2
+                )
+                window.setFrame(NSRect(origin: origin, size: size), display: true)
+            }
         }
+        return view
     }
+
+    func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
 @Observable
@@ -91,7 +122,7 @@ final class AppState {
                 }
             }
         } catch {
-            // Keep defaults if we can't read the file; Phase 11 will banner.
+            // Keep defaults if we can't read the file; banner UX lands later.
         }
     }
 }
