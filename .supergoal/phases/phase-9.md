@@ -1,66 +1,95 @@
 SUPERGOAL_PHASE_START
-Phase: 9 of 13 — Worktree shelf
-Task: Build a left-sidebar worktree shelf that lists every git worktree for the current project; supports Cmd-Shift-W to create a new worktree, click-to-jump (focus a pane in that cwd), and surface dirty/clean state per worktree.
-Type: greenfield, ui, core
-Mandatory commands: xcodebuild -scheme Hangar -destination 'platform=macOS' build, xcodebuild -scheme Hangar -destination 'platform=macOS' test, swiftlint --strict, swift-format lint --recursive --strict Sources Tests Hangar
-Acceptance criteria: 10
-Evidence required: build/test exit codes, screenshot of shelf with 2+ worktrees, jump-to-worktree round-trip
-Depends on phases: 4
+Phase: 9 of 9 — I · Polish + ship v0.2.0
+Task: Bump version to 0.2.0; update CHANGELOG with the agent-orchestration story; archive + sign + notarize + staple universal Hangar.app + DMG; tag v0.2.0; create the GitHub release with DMG attached; bump the Homebrew cask and push the tap.
+Type: distribution, release
+Mandatory commands: xcodebuild build, swiftlint --strict, swift-format lint --recursive --strict Sources Tests Hangar, bash scripts/release/build-release.sh, bash scripts/release/notarize.sh, bash scripts/release/build-dmg.sh
+Acceptance criteria: 14
+Evidence required: release URL; DMG SHA-256 matching cask; notarization ticket IDs; `brew upgrade --cask hangar` verified locally
+Depends on phases: 1-8
 
 ## Why
 
-Multi-agent + multi-branch is the real-world use case: one Claude on `main`, one Codex on a feature branch, both in worktrees so they don't clobber each other. Today, doing this is a manual cd/branch/worktree dance. Hangar makes it one keystroke.
+A v0.2 that nobody can download is vapor. This phase converts every prior phase's work into a thing the user can `brew upgrade --cask hangar` to get.
 
 ## Work
 
-- Add `Sources/HangarCore/Git/`:
-  - `GitService` actor: shells out to `git` via `Process`; methods: `worktrees(in repoRoot: URL) -> [Worktree]`, `createWorktree(at path: URL, branch: String, baseRef: String) -> Worktree`, `removeWorktree(at: URL)`, `status(of: URL) -> WorktreeStatus`
-  - `Worktree` — `path: URL`, `branch: String`, `headSHA: String`, `isDirty: Bool`, `aheadCount: Int`, `behindCount: Int`
-  - `WorktreeStatus` — `clean | dirty(stagedCount: Int, unstagedCount: Int, untrackedCount: Int)`
-- Worktrees live under `worktree.base_dir` from config (default `~/Hangar/Worktrees`); when creating, Hangar names the directory `<repoName>-<branch>` (sanitized)
-- Add `Sources/HangarKit/Sidebar/`:
-  - `LeftSidebar` — collapsible sidebar with three sections: Projects (from Phase 4), Context shelf placeholder (v0.2), Worktrees
-  - `WorktreeShelfSection` — list rows; each row shows branch name, repo name, dirty dot, ahead/behind chevrons; right-click context menu for Remove (with confirmation)
-  - `NewWorktreeSheet` — sheet shown on Cmd-Shift-W; prompts for branch name (with autocomplete from `git branch --all`); option to create-from-current-branch or pick-base; "Open in new tab" toggle
-  - Keyboard: Cmd-Shift-W triggers the sheet; Enter creates; Escape cancels
-- Behavior on click:
-  - If the user has a pane in focus, change its cwd by sending `cd <path>\n` (raw shell only) — for agent panes, prompt first ("This pane is running claude. Open the worktree in a new pane instead?")
-  - If no pane is focused or "Open in new tab" is on, create a new tab with a fresh pane in the worktree cwd
-- Tests under `Tests/HangarCoreTests/Git/`:
-  - `GitServiceWorktreeRoundTripTests` — in a temp directory, init a repo, create a worktree via service, list it, remove it; assert success at each step (skip on CI if git not installed — but git is standard on macos-26 runners)
-  - `GitServiceStatusParsingTests` — given canned `git status --porcelain=v2` output, parse correctly into `WorktreeStatus`
-  - `GitServiceWorktreeNamingTests` — sanitize branch names with slashes / special chars into safe directory names
+- Bump version in `project.yml`:
+  - `MARKETING_VERSION: "0.2.0"`
+  - `CURRENT_PROJECT_VERSION: "3"`
+- Update `Sources/HangarCore/HangarCore.swift`: `version = "0.2.0"`; `buildIdentifier = "v0.2.0"`
+- Update `Tests/HangarKitTests/HangarKitTests.swift` version assertion to `"0.2.0"`
+- CHANGELOG `[0.2.0]` section — full agent-orchestration story:
+  - Title-bar overlay with model badge + status pill + cost pill + approval bell + Mission Control
+  - Output-stream → agent profile detection
+  - Approval inbox routes prompts; macOS notifications; Cmd-Shift-A popover
+  - Cost ledger live
+  - Mission Control (Cmd-0)
+  - Left sidebar (Cmd-Shift-S) with projects + worktrees; Cmd-Shift-W new-worktree sheet
+  - Right sidecar (Cmd-Option-D) with live file diffs
+  - Terminal table-stakes (tabs, font sizing, find, clear, URL Cmd-click, drag-folder, restore-last-state)
 
-## Acceptance criteria (all must pass — verify each in transcript)
+- Run the release pipeline (reuse v0.1.1 scripts):
+  - `xcodegen generate`
+  - `xcodebuild archive` Release universal
+  - `xcodebuild -exportArchive`
+  - `ditto -c -k ... | xcrun notarytool submit --keychain-profile AC_PASSWORD --wait`
+  - `xcrun stapler staple build/export/Hangar.app`
+  - `create-dmg ... dist/Hangar-0.2.0.dmg`
+  - `codesign --sign "Developer ID Application: Robert Courson (9F2JXY8TCK)" --options runtime --timestamp dist/Hangar-0.2.0.dmg`
+  - `xcrun notarytool submit dist/Hangar-0.2.0.dmg --keychain-profile AC_PASSWORD --wait`
+  - `xcrun stapler staple dist/Hangar-0.2.0.dmg`
+  - `shasum -a 256 dist/Hangar-0.2.0.dmg` → record
 
-- Sidebar opens via View > Toggle Sidebar; closes again on same shortcut
-- Worktree section lists all worktrees for the current project (verified against `git worktree list` output)
-- Each row shows branch, dirty dot, ahead/behind chevrons
-- Cmd-Shift-W opens the new-worktree sheet
-- Creating a worktree adds a directory under `~/Hangar/Worktrees/<repo>-<branch>` (or configured base) and the sheet dismisses successfully
-- Clicking a worktree with an agent pane focused prompts; clicking with a shell pane focused changes the pane's cwd
-- Removing a worktree from the right-click menu calls `git worktree remove` and the row disappears
-- All three Git test classes pass
-- Build / test / lint exit 0
-- Worktree base dir honors `config.worktree.base_dir` (test with a non-default value)
+- Tag and release:
+  - `git tag -a v0.2.0 -m "Hangar 0.2.0 — visible agent orchestration"`
+  - `git push origin main`
+  - `git push origin v0.2.0`
+  - `gh release create v0.2.0 dist/Hangar-0.2.0.dmg --title "Hangar v0.2.0" --notes-file release-notes-0.2.0.md`
 
-## Mandatory commands (run each, surface last ~10 lines + exit code)
+- Homebrew Cask update:
+  - In `/tmp/homebrew-hangar` (or a clean clone): update `Casks/hangar.rb` version + SHA-256
+  - Commit + push
+  - Verify with `brew update && brew upgrade --cask hangar` on this machine
 
-- `xcodebuild -scheme Hangar -destination 'platform=macOS' build | xcbeautify`
-- `xcodebuild -scheme Hangar -destination 'platform=macOS' test | xcbeautify`
-- `swiftlint --strict`
-- `swift-format lint --recursive --strict Sources Tests Hangar`
+- Replace `/Applications/Hangar.app` with the freshly notarized build and confirm `brew info --cask hangar` shows 0.2.0
 
-## Evidence required in transcript
+## Acceptance criteria
 
-- File listing of `Sources/HangarCore/Git/` and `Sources/HangarKit/Sidebar/`
-- Test output naming the three Git test classes
-- `.supergoal/evidence/phase-9-worktree-shelf.png` — screenshot showing sidebar with 2+ worktrees, one dirty
-- One-paragraph description of the create→jump→remove round-trip
+- project.yml MARKETING_VERSION is 0.2.0
+- HangarCore.version returns "0.2.0"
+- HangarKitTests version assertion updated and passes
+- CHANGELOG `[0.2.0]` section lists every feature shipped in phases A-H
+- Universal Release .app built (`lipo -info` shows arm64 + x86_64)
+- .app codesign verify exits 0
+- .app notarization status Accepted; stapler validate green
+- DMG built at `dist/Hangar-0.2.0.dmg`
+- DMG notarization status Accepted; stapler validate green
+- DMG SHA-256 captured to dist/Hangar-0.2.0.dmg.sha256
+- GitHub release v0.2.0 exists with DMG asset (verifiable via `gh release view v0.2.0`)
+- Homebrew cask updated to 0.2.0 with the correct SHA-256
+- `brew info --cask hangar` shows 0.2.0
+- `/Applications/Hangar.app` runs the new build (verifiable via Hangar > About showing 0.2.0)
+
+## Mandatory commands
+
+- `swift test`
+- `xcodebuild -scheme Hangar -destination 'platform=macOS' -configuration Release archive -archivePath build/Hangar.xcarchive ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO`
+- `xcodebuild -exportArchive -archivePath build/Hangar.xcarchive -exportPath build/export -exportOptionsPlist scripts/release/ExportOptions.plist`
+- `xcrun notarytool submit ... --keychain-profile AC_PASSWORD --wait --output-format json`
+- `xcrun stapler staple build/export/Hangar.app`
+- `xcrun stapler staple dist/Hangar-0.2.0.dmg`
+- `gh release create v0.2.0 dist/Hangar-0.2.0.dmg ...`
+
+## Evidence required
+
+- Notarization ticket IDs for .app + DMG
+- DMG SHA-256
+- GitHub release URL
+- `gh release view v0.2.0 --json url,assets`
+- Brew install log showing 0.2.0
+- About-panel screenshot showing 0.2.0
 
 ## Notes
 
-- Shelling out to `git` keeps v0.1 dep-light. v0.2 may swap to libgit2/SwiftGit2 for richer status without subprocess overhead.
-- Use `--porcelain=v2` for stable parsing.
-- Worktrees can't be created for a branch that's already checked out elsewhere — surface this error path with a clear sheet ("Branch already checked out in <path>").
-- Save `reference_git_worktree_porcelain_v2.md` if any non-obvious parsing tail-case shows up.
+- If notarytool credentials need refreshing: stop and surface `xcrun notarytool store-credentials AC_PASSWORD ...` per feedback_dont_run_generators
+- The cask SHA must exactly match the DMG SHA; mismatch = brew install fails verification

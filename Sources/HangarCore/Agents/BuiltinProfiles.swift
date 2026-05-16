@@ -142,10 +142,14 @@ struct AgentRegexParser: AgentOutputParser {
     }
 }
 
-/// No-op parser for the raw shell profile; status stays idle.
-struct NoopAgentParser: AgentOutputParser {
-    var status: AgentStatus { .idle }
-    mutating func feed(_ chunk: Data) -> [AgentEvent] {
+/// No-op parser used by the raw shell profile (status stays idle).
+///
+/// Public so PaneViewModel in HangarKit can default to it before an agent
+/// is detected.
+public struct NoopAgentParser: AgentOutputParser {
+    public init() {}
+    public var status: AgentStatus { .idle }
+    public mutating func feed(_ chunk: Data) -> [AgentEvent] {
         _ = chunk
         return []
     }

@@ -1,34 +1,22 @@
-# Detected tools (this session)
+# Tools detected for v0.2 integration run
 
-## Universal tooling
-- Bash, Read, Write, Edit, TaskCreate/Update/List, Skill, Agent (subagents), AskUserQuestion, ScheduleWakeup
-- ToolSearch (deferred tools available on demand)
+## Build / lint / test
+- swift 6.2.4 (✓), xcodebuild 26.3 (✓), xcbeautify (✓), swiftlint (✓), swift-format @ /opt/homebrew/bin (✓), xcodegen (✓)
+
+## Release pipeline (already proven in v0.1)
+- Developer ID Application: Robert Courson (9F2JXY8TCK) — present in keychain
+- notarytool profile `AC_PASSWORD` — configured
+- create-dmg (✓)
+- gh CLI authenticated as robzilla1738 (✓)
+
+## Live smoke
+- `claude` (/Users/robert/.local/bin/claude)
+- `codex` (/opt/homebrew/bin/codex)
+- `hermes` (/Users/robert/.local/bin/hermes)
+- All three available for real-pane integration testing in phases A, C, D, E
 
 ## Web + docs
-- **Context7** (`mcp__claude_ai_Context7__resolve-library-id`, `mcp__claude_ai_Context7__query-docs`) — available. Use for current docs on SwiftTerm, Sparkle 2, GRDB.swift, swift-nio, libghostty, MCP Swift SDK.
-- **WebSearch / WebFetch** — available. Use for community patterns (notarization, Liquid Glass APIs, agent CLI behaviors).
+- Context7 + WebSearch available; rely on training-cutoff for SwiftTerm/Sparkle API stability
 
-## Agents (subagent_type)
-- `Explore` — read-only fast search
-- `Plan` — implementation strategy
-- `general-purpose` — multi-step research
-- `geo-*`, `svvarm:*` — domain agents, not applicable here
-
-## Project skills to consult during phases
-| Skill | When |
-|---|---|
-| `macos` | Every Swift/SwiftUI phase — patterns, AppKit bridging, macOS 26 Tahoe APIs, Liquid Glass |
-| `swift` | Swift 6 strict concurrency, performance, language idioms |
-| `design` | Liquid Glass surfaces, animations, Apple HIG fit |
-| `security` | Permission handling, signing, sandboxing decisions, secure storage of API keys |
-| `testing` | XCTest infra, characterization tests, snapshot tests for UI |
-| `product` | Spec docs, architecture notes |
-| `release-review` | Final pre-tag review before notarization & release |
-| `generators` | Skim for any reusable patterns (logging, settings, persistence) |
-| `app-store` | Not directly applicable (not shipping App Store) — skip |
-| `legal` | LICENSE (MIT) + minimal NOTICE file |
-
-## Notes
-- Pinecone MCP available but not relevant for v0.1 (semantic history is v0.2+).
-- No live GitHub MCP — use `gh` CLI via Bash for repo/release ops.
-- No live Xcode MCP — drive Xcode/xcodebuild via Bash; auth grants surface to user.
+## Project skills relevant
+- `macos`, `swift`, `design`, `testing`, `security`, `release-review`

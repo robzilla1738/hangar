@@ -1,50 +1,38 @@
-# State: Hangar v0.1
+# State: Hangar v0.2.0 — visible agent orchestration
 
-**Status:** RELEASE_PUBLISHED
-**Current phase:** complete
+**Status:** IN_PROGRESS
+**Current phase:** 2
 **Started:** 2026-05-16
-**Last update:** 2026-05-16 12:01
-**Baseline ref:** d9c830670f9e58b031f4e2f0ca0605125c39d228 (initial commit; previously no-git)
+**Last update:** 2026-05-16
+**Baseline ref:** 0019939aed44d32e16568864a1f65191f568b58c
 
 ## Phase progress
 
 | # | Phase | Status | Started | Completed | Notes |
 |---|-------|--------|---------|-----------|-------|
-| 1 | Bootstrap repo + project + CI | completed | 2026-05-16 11:35 | 2026-05-16 12:01 | Deployment target revised to macOS 15 (CI constraint); CI green on macos-15 |
-| 2 | Terminal foundation (SwiftTerm pane) | completed | 2026-05-16 12:02 | 2026-05-16 12:11 | SwiftTerm-owned PTY; standalone PTYProcess deferred to v0.2 (libghostty swap) |
-| 3 | Config + hot reload | completed | 2026-05-16 12:11 | 2026-05-16 12:16 | JSON5 via JSONSerialization.json5Allowed; watcher works on atomic writes (macOS 26 verified) |
-| 4 | Multi-pane layout | completed | 2026-05-16 12:16 | 2026-05-16 12:21 | Splits + close wired; SQLite persistence deferred to a sub-phase (in-memory ProjectStore for now) |
-| 5 | Agent profile system | completed | 2026-05-16 12:22 | 2026-05-16 12:25 | Built-in profiles + regex-driven parser; live PID detection deferred to Phase 6 (per-pane profile assignment will use the spawned command at start) |
-| 6 | Agent awareness (status + Approval Inbox) | completed | 2026-05-16 12:25 | 2026-05-16 12:28 | Inbox actor + notifications + UI; Carbon global hotkey + per-pane wiring deferred |
-| 7 | Mission Control grid | completed | 2026-05-16 12:28 | 2026-05-16 12:30 | Snapshot type, sorter, overlay UI; Cmd-0 wiring deferred |
-| 8 | Cost ledger + cost pill | completed | 2026-05-16 12:30 | 2026-05-16 12:33 | Ledger actor + pricing table + pill UI; SQLite persistence + per-profile parsers + breakdown sheet deferred |
-| 9 | Worktree shelf | completed | 2026-05-16 12:33 | 2026-05-16 12:36 | GitService + shelf UI; integration tests against real repo + create-sheet deferred |
-| 10 | Diff sidecar (FSEvents) | completed | 2026-05-16 12:36 | 2026-05-16 12:39 | Polling-based FSEventsWatcher; diff service + sidecar UI; FSEventStream-callback swap deferred |
-| 11 | Polish (Liquid Glass + themes) | completed | 2026-05-16 12:39 | 2026-05-16 12:42 | Theme types + 2 builtins; screenshots placeholder; Liquid Glass surface application deferred |
-| 12 | Harden (security + a11y + perf) | completed | 2026-05-16 12:42 | 2026-05-16 12:45 | Keychain + security review + a11y checklist; Instruments traces deferred |
-| 13 | Distribute (sign + notarize + release) | completed | 2026-05-16 12:45 | 2026-05-16 12:52 | DMG signed + notarized + stapled; v0.1.0 GitHub release published; Homebrew tap live |
+| 1 | A · Output wiring + ShellCommandDetector | completed | 2026-05-16 13:45 | 2026-05-16 13:53 | 12 new tests pass; protocol gained outputStream; PaneViewModel observes + classifies |
+| 2 | B · Title-bar overlay + AppState registry | pending | — | — | — |
+| 3 | C · Approval routing end-to-end | pending | — | — | — |
+| 4 | D · Cost wiring | pending | — | — | — |
+| 5 | E · Mission Control (Cmd-0) | pending | — | — | — |
+| 6 | F · Left sidebar (projects + worktrees) | pending | — | — | — |
+| 7 | G · Right sidecar (diff) | pending | — | — | — |
+| 8 | H · Terminal table-stakes | pending | — | — | — |
+| 9 | I · Polish + ship v0.2.0 | pending | — | — | — |
 
 ## Engineering check status
 
-Updated by each phase as it runs. Always reflects the most recent engineering check.
-
 - Build: —
-- Typecheck: —
 - Lint: —
 - Tests: —
+- Smoke: —
 
 ## Notable events
 
-- 2026-05-16 — Plan locked, 13 phases.
-- 2026-05-16 — Pre-flight red (expected for greenfield empty repo): xcodebuild build/test report "no Xcode project"; swiftlint not installed; swift-format on PATH is a chromium wrapper. All four are exactly what Phase 1 creates/installs.
-- 2026-05-16 — Pre-flight bypassed by user (greenfield baseline is intentionally absent).
-- 2026-05-16 — Status: READY_TO_DISPATCH. Ready to paste /goal.
-- 2026-05-16 — Phase 1 in progress; deployment target revised from macOS 26 to macOS 15 (CI macos-15 runner constraint). Liquid Glass features in Phase 11 will be `@available(macOS 26, *)`-gated. Updated phase-1.md and ROADMAP.md to reflect.
-- 2026-05-16 — Phase 1 build/test/lint green locally AND on GitHub Actions CI; initial commit 087b6dd pushed to robzilla1738/hangar.
-- 2026-05-16 — Memory writeback: reference-xcode26-swiftterm-metal, reference-swift-format-config.
-- 2026-05-16 — Phase 13: App notarized (Apple ticket ee86999d-47b5-48d9-bac6-308845fe5467); DMG notarized (ticket 5409688f-a6ce-401a-b6b7-7fc628321eaa); both stapled. SHA-256 of DMG: 6252dd4204974a4204653b4e8c9831ba684afa302a61691f9a66dcd00b6b6b9b.
-- 2026-05-16 — Tag v0.1.0 pushed; GitHub release at https://github.com/robzilla1738/hangar/releases/tag/v0.1.0 with Hangar-0.1.0.dmg asset.
-- 2026-05-16 — Homebrew tap robzilla1738/homebrew-hangar published with cask pointing at the release DMG. `brew install --cask hangar` verified end-to-end.
+- 2026-05-16 — Plan locked, 9 phases. v0.1 supergoal artifacts archived to `.supergoal/archive/`.
+- 2026-05-16 — Self-critique: rewrote 2 loose criteria (phase 6, phase 8) for falsifiability.
+- 2026-05-16 — Pre-flight green: swift test / swift build / xcodebuild build / swiftlint / swift-format all clean.
+- 2026-05-16 — Status: READY_TO_DISPATCH.
 
 ## Failure log
 

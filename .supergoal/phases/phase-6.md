@@ -1,75 +1,82 @@
 SUPERGOAL_PHASE_START
-Phase: 6 of 13 — Agent awareness (status pill + Approval Inbox + notifications + hotkey)
-Task: Surface each pane's agent status via a Liquid Glass pill; route every awaiting-approval event into a unified Approval Inbox popover; deliver macOS notifications on new approvals; bind global hotkey Cmd-Shift-A.
-Type: greenfield, ui, core
-Mandatory commands: xcodebuild -scheme Hangar -destination 'platform=macOS' build, xcodebuild -scheme Hangar -destination 'platform=macOS' test, swiftlint --strict, swift-format lint --recursive --strict Sources Tests Hangar
-Acceptance criteria: 12
-Evidence required: build/test exit codes, screenshot of pane with status pill + approval inbox popover open, test summary for approval routing
-Depends on phases: 5
+Phase: 6 of 9 — F · Left sidebar (projects + worktrees)
+Task: Wrap WindowRootView's content in an `HStack(LeftSidebar, PaneTree)` with a collapsible LeftSidebar (default visible). Sidebar has two sections — Projects (recent projects from ProjectStore) and Worktrees (GitService-fed list for the current project). Cmd-Shift-S toggles visibility; Cmd-Shift-W opens a new-worktree sheet.
+Type: brownfield, ui, integration
+Mandatory commands: swift test, xcodebuild build, xcodebuild test, swiftlint --strict, swift-format lint --recursive --strict Sources Tests Hangar
+Acceptance criteria: 9
+Evidence required: build/test/lint clean; screenshot with sidebar visible showing worktrees for the current repo; screenshot of new-worktree sheet open
+Depends on phases: 2
 
 ## Why
 
-This is the headline differentiator. Without unified approval routing + notifications, multi-agent workflows are still a tab-juggling exercise. This phase makes Hangar's value visible.
+Worktrees + projects are how multi-agent workflows stop colliding on the same checkout. The sidebar makes them first-class.
 
 ## Work
 
-- Add `Sources/HangarCore/Awareness/`:
-  - `ApprovalInbox` actor — single source of truth for pending approvals across all panes/windows
-  - `ApprovalItem` — `id`, `paneID`, `agentID`, `prompt: String`, `detectedAt`, `state: .pending | .approved | .denied | .approvedAll`
-  - `ApprovalInbox.add(_:)`, `.respond(itemID:, action:)`, `.items: AsyncStream<[ApprovalItem]>`
-  - `respond` writes the user's input (`y\n`, `n\n`, `a\n`) back to the originating pane's `PTYProcess.write(_:)`
-- `NotificationCenter` integration via `UNUserNotificationCenter`:
-  - Request authorization on first launch
-  - On new approval, deliver a notification: title `Hangar — <Agent Name> needs approval`, body the prompt (truncated 80 chars), category `HANGAR_APPROVAL` with action buttons `Approve`, `Deny`, `Approve all`
-  - Notification action handler routes back through `ApprovalInbox.respond`
-- Global hotkey:
-  - `HotKeyService` actor wrapping Carbon `RegisterEventHotKey` for system-wide capture; parses keybinding strings from `config.keybindings`
-  - Cmd-Shift-A pops the Approval Inbox (focuses the menu-bar bell or opens a window-attached popover, whichever window is frontmost)
-- `Sources/HangarKit/Awareness/`:
-  - `StatusPill` — Liquid Glass pill rendering the agent status with icon + label (idle/working/awaiting/done/errored). Animated dot color transitions.
-  - `AgentModelBadge` — small text pill: model name + provider color
-  - `ApprovalInboxBell` — title-bar button with badge count; opens popover
-  - `ApprovalInboxPopover` — list of `ApprovalItem` rows with action buttons; keyboard nav (j/k or arrows; enter approves)
-  - Empty state for popover: "No pending approvals — your agents are all clear."
-- Wire `AgentOutputParser.feed` events: when `stateChanged(.awaiting_approval(let prompt))` arrives, `ApprovalInbox.add(...)`
-- Tests under `Tests/HangarCoreTests/Awareness/`:
-  - `ApprovalInboxRoutingTests` — feed Claude Code fixture with an approval prompt → assert one item appears in inbox → call `respond(.approve)` → assert the originating pane received `y\n`
-  - `MultiAgentInboxTests` — two simulated panes (Claude + Codex) both raise approvals; both appear; respond to each independently; assert correct routing
-  - `NotificationCategoryRegistrationTests` — assert `UNUserNotificationCenter.notificationCategories` contains the `HANGAR_APPROVAL` category with three actions
-  - `HotKeyServiceTests` — parse "cmd+shift+a" to the right Carbon modifier mask + key code
+- Add `Sources/HangarKit/Sidebar/LeftSidebar.swift`:
+  - SwiftUI view (~260pt wide collapsible)
+  - Two sections via `Section { ... }` blocks: "Projects" and "Worktrees"
+  - Projects section: rows from `appState.projects.list()` with current cwd highlighted
+  - Worktrees section: instance of `WorktreeShelfView` (existing) wired to `appState.worktrees(for: currentProject)`
+  - Header: "Hangar" wordmark + a small + button for new project
 
-## Acceptance criteria (all must pass — verify each in transcript)
+- Add `Sources/HangarKit/Sidebar/NewWorktreeSheet.swift`:
+  - SwiftUI sheet prompting for branch name + base ref (default HEAD) + "Open in new tab" toggle
+  - On submit: calls `appState.createWorktree(branch:baseRef:openInNewTab:)`
 
-- `StatusPill` appears on every pane header and reflects the live `currentStatus` from Phase 5
-- Approval prompt from a Claude Code fixture routes into `ApprovalInbox` within 200ms
-- ApprovalInboxBell shows the right badge count and updates as items are added/responded
-- Clicking "Approve" in the popover causes the originating pane to receive `y\n` (test-verified by capturing what was written)
-- "Approve all" sets that item's state to `.approvedAll` and any subsequent prompts of the same type auto-route to approved
-- macOS notification is delivered (visible in Notification Center) when a new approval is added; verify via `UNUserNotificationCenter.getDeliveredNotifications`
-- Notification action button "Approve" routes through the same `ApprovalInbox.respond` path
-- Cmd-Shift-A opens the Approval Inbox popover globally (works when another app is frontmost — focus returns to Hangar)
-- All four awareness test classes pass
-- Empty-state copy renders when inbox is empty
-- A simulated Codex approval and Claude approval both fire correctly without cross-talk
-- Build / test / lint exit 0
+- Extend AppState with:
+  - `let projects: ProjectStore`
+  - `var sidebarVisible: Bool = true`
+  - `var newWorktreeSheetPresented: Bool = false`
+  - `var worktreesByProject: [UUID: [Worktree]] = [:]`
+  - `func refreshWorktrees(for project: Project)` — calls GitService.worktrees(in: project.cwd)
+  - `func createWorktree(branch:baseRef:openInNewTab:)` — GitService.createWorktree + refresh + optionally spawn new pane
 
-## Mandatory commands (run each, surface last ~10 lines + exit code)
+- WindowRootView layout becomes:
+  ```
+  VStack {
+      WindowOverlayBar(...)
+      HStack(spacing: 0) {
+          if appState.sidebarVisible { LeftSidebar(...).frame(width: 260) }
+          PaneTreeView(...).frame(maxWidth: .infinity)
+      }
+  }
+  ```
 
+- Cmd-Shift-S binding via SwiftUI Command: toggles `appState.sidebarVisible`
+- Cmd-Shift-W binding: sets `appState.newWorktreeSheetPresented = true`
+- Sheet attached to ContentView via `.sheet(isPresented:)`
+
+- Tests under `Tests/HangarCoreTests/Git/`:
+  - `GitServiceLiveTests` (gated `#if INTEGRATION_TEST`) — create temp repo, init, commit, run `worktrees(in:)` returns 1; `createWorktree(...)` adds a second
+  - Skip on CI; run locally as `INTEGRATION_TEST=1 swift test`
+
+## Acceptance criteria
+
+- LeftSidebar.swift + NewWorktreeSheet.swift exist
+- AppState exposes the documented sidebar/worktree state and methods
+- WindowRootView includes the HStack-wrapped content with conditional sidebar
+- Cmd-Shift-S toggles sidebar (verifiable by automation: open Hangar, press Cmd-Shift-S, capture, verify width differs)
+- Cmd-Shift-W opens the sheet
+- GitServiceLiveTests passes with `INTEGRATION_TEST=1 swift test` locally and its stdout is committed at `.supergoal/evidence/phase-6-worktree-roundtrip.log` (asserts `git worktree list` shows the created branch by name)
+- All existing GitService tests still pass; new live integration test passes locally
+- Build/test/lint exit 0
+- Smoke screenshots committed: `.supergoal/evidence/phase-6-sidebar.png` and `.supergoal/evidence/phase-6-new-worktree-sheet.png`
+
+## Mandatory commands
+
+- `swift test`
 - `xcodebuild -scheme Hangar -destination 'platform=macOS' build | xcbeautify`
 - `xcodebuild -scheme Hangar -destination 'platform=macOS' test | xcbeautify`
 - `swiftlint --strict`
-- `swift-format lint --recursive --strict Sources Tests Hangar`
+- `/opt/homebrew/bin/swift-format lint --recursive --strict Sources Tests Hangar`
 
-## Evidence required in transcript
+## Evidence required
 
-- File listing of new types and views
-- Test output naming the four new test classes
-- `.supergoal/evidence/phase-6-approval-inbox.png` — screenshot showing a pane with status pill set to "awaiting approval" + popover open listing one approval item
-- One-paragraph description of the macOS notification trigger smoke
+- Smoke screenshots committed
+- Local integration-test log showing GitService round-trip works against /Users/robert/Code/terminal itself
 
 ## Notes
 
-- Consult `macos` skill for `UNUserNotificationCenter` action category setup on macOS 26.
-- Carbon `RegisterEventHotKey` is still the right API for global hotkeys on macOS 26 (no SwiftUI equivalent). Use a Carbon event handler with `kEventClassKeyboard`/`kEventHotKeyPressed`.
-- Status pill animation: use SwiftUI's `withAnimation` + `phaseAnimator` (macOS 26) for the breathing dot when state is `thinking`.
-- Save `reference_unusernotificationcenter_macos26_action_buttons.md` if action-button delivery has any macOS 26 idiosyncrasy.
+- For the current project, default to "the cwd of the active pane's `emulator`" — track via the OSC 7 hook (already wired) or fall back to user-home.
+- LeftSidebar is visible by default; the user can collapse via Cmd-Shift-S. Persist visibility to config.json5 in a follow-up phase (out of scope for v0.2).

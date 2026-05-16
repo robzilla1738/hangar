@@ -33,6 +33,13 @@ public protocol TerminalEmulator: AnyObject {
     /// Whether the emulator has been started.
     var isRunning: Bool { get }
 
+    /// Stream of raw PTY output bytes.
+    ///
+    /// `PaneViewModel.startObserving` iterates this stream to drive agent
+    /// detection (via `ShellCommandDetector`), status updates (via
+    /// `AgentRegexParser`), and cost accounting.
+    var outputStream: AsyncStream<Data> { get }
+
     /// Start the child process inside the PTY.
     ///
     /// - Parameters:

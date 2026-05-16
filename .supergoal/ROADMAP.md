@@ -1,68 +1,53 @@
-# Roadmap: Hangar — native macOS agentic terminal (v0.1)
+# Roadmap: Hangar v0.2.0 — visible agent orchestration
 
-**Task:** Build Hangar, a native macOS terminal designed around managing multiple AI CLI agents (Claude Code, Codex CLI, Hermes), and ship a signed/notarized v0.1.0 release on GitHub + Homebrew Cask tap.
-**Type:** greenfield, macOS, ui, swift
+**Task:** Wire every existing HangarCore/HangarKit type into the visible UI so opening Hangar and typing `claude`/`codex`/`hermes` produces a visibly different experience from any other terminal — model badge, status pill, approval bell + macOS notification, cost pill, Mission Control, sidebar, sidecar.
+**Type:** brownfield, ui, integration
 **Created:** 2026-05-16
-**Total phases:** 13
+**Total phases:** 9
 
 ## Context summary
 
-- **Stack:** Swift 6.2 (strict concurrency) · SwiftUI + AppKit · SwiftTerm 1.x · GRDB.swift · Sparkle 2 · Xcode 26.3 · macOS 26.2 SDK (Tahoe)
-- **Package manager:** Swift Package Manager (for libs); Homebrew for system tooling (SwiftLint, xcbeautify, create-dmg)
+- **Stack:** Swift 6.2 strict concurrency · SwiftUI + AppKit · SwiftTerm 1.13 · GRDB 7 · Sparkle 2 · Xcode 26.3 · macOS 15 deployment target (Liquid Glass features `@available(macOS 26, *)`-gated)
+- **Repo state:** v0.1.1 shipped (commit 0019939); GitHub release live; Homebrew tap live
 - **Build / test / lint commands:**
   - `xcodebuild -scheme Hangar -destination 'platform=macOS' build | xcbeautify`
   - `xcodebuild -scheme Hangar -destination 'platform=macOS' test | xcbeautify`
+  - `swift test`
   - `swiftlint --strict`
-  - `swift-format lint --recursive --strict Sources Tests Hangar`
-- **Risky areas:** SwiftTerm edge cases (vim, true color, IME); agent prompt regex fragility; cost calc reconciliation; macOS 26 Liquid Glass API churn
+  - `/opt/homebrew/bin/swift-format lint --recursive --strict Sources Tests Hangar`
+- **Risky areas:** SwiftUI toolbar vs transparent NSWindow chrome; agent detection from PTY output without OSC 133; screencapture automation
 
 ## Assumptions
 
-Non-blocking decisions recorded so we can proceed without round-trips. If wrong, stop the run and tell us:
-
-- macOS 15 Sequoia minimum deployment target (CI macos-15 runner has Xcode 16, can only build for macOS 15 SDK). Liquid Glass features in Phase 11 will be gated behind `@available(macOS 26, *)` and the app still functions on macOS 15 with the non-Liquid-Glass fallback. Revised from macOS 26 in Phase 1; original assumption was based on local SDK availability, not CI realities.
-- License: MIT (no NOTICE file in v0.1).
-- Default font: SF Mono ships in macOS; JetBrains Mono Light bundled as a built-in option (SIL OFL).
-- Homebrew distribution: own tap `robzilla1738/homebrew-hangar` at first; submit to `homebrew/cask` after v0.2.
-- Default agent profile detection is binary-name based on the foreground process; PTY output parsing is for state-machine and approval prompts only.
-- No telemetry, no analytics, no crash reporter network calls in v0.1.
-- Sparkle EdDSA: keys generated in Phase 13; private key stored in `~/.config/hangar-secrets/` (outside repo), public key embedded in `Info.plist`.
-- App icon for v0.1: placeholder (Hangar wordmark on dark gradient); real icon post-v0.1.
-- Code layout: one Xcode app target (`Hangar`) + two Swift Package modules (`HangarCore` for non-UI logic, `HangarKit` for UI components).
-- Hardened runtime entitlements: `com.apple.security.cs.allow-jit`, `com.apple.security.cs.disable-library-validation`. No App Sandbox.
-- Team ID: `9F2JXY8TCK`; Developer ID Application: "Robert Courson (9F2JXY8TCK)".
-- GitHub repo: `robzilla1738/hangar`, public.
+- v0.1.1 chrome (transparent title bar, dark window background) stays; the new title-bar overlay is a custom `WindowOverlayBar` view at the top of the content area, not a SwiftUI `.toolbar`
+- Agent detection uses a `ShellCommandDetector` (regex over `% command` / `$ command` lines) plus the existing `AgentRegistry.resolve(binaryName:)`. OSC 133 shell-integration is documented as a v0.3 upgrade.
+- `screencapture -l <window-id>` (window-id from `osascript -e 'tell app "Hangar" to id of window 1'`) is the preferred smoke-capture mechanism; full-screen fallback if Accessibility is denied.
+- AppState gains a shared `ApprovalInbox`, `CostLedger`, plus an `openWindows: [WindowViewModel]` registry that windows register/unregister on appear/disappear.
+- `PaneInputSink` returned to the inbox writes to the originating emulator's PTY via a callback held by the registry.
+- Mission Control opens as a borderless `NSWindow` (modal panel level) over whatever's frontmost.
+- Sidebar/sidecar wrap the existing `WindowRootView` in an `HStack(LeftSidebar, RootPaneTree, RightSidecar)` with collapse state on `WindowViewModel`.
+- v0.2.0 versioning: bump `MARKETING_VERSION` to `0.2.0`; tag `v0.2.0`; cask SHA-256 from the new notarized DMG.
 
 ## Risk top 3
 
-1. **SwiftTerm edge cases** — likelihood: medium, mitigation: abstract behind `TerminalEmulator` protocol; smoke-test `vim`/`htop`/`nano`/`claude`/`codex` in Phase 2; document libghostty swap path for v0.2.
-2. **Agent prompt detection regex fragility** — likelihood: medium, mitigation: per-profile regex sets tested against recorded session fixtures; conservative defaults; manual-flag fallback in inbox; document OSC handshake spec for v0.2.
-3. **Cost calc from CLI output is non-standard** — likelihood: high (correctness), low (UX impact), mitigation: per-profile parsers for "estimated"; nightly background reconciliation via provider APIs for "confirmed"; badge state in UI; don't block on reconciliation failure.
+1. **SwiftUI toolbar vs transparent NSWindow** — likelihood high, mitigation: ship a custom in-content overlay row; don't touch SwiftUI `.toolbar`.
+2. **Agent detection misses commands** — likelihood medium, mitigation: per-shell regex set with conservative defaults; manual model badge override via UI (deferred to v0.3) noted; ShellCommandDetector tested against zsh+bash+fish prompt formats.
+3. **Smoke screenshots flaky** — likelihood medium, mitigation: capture via NSWindow ID; fall back to full-screen with `-x`; treat blank/wrong-app screenshots as a phase failure and retry per 3-strike.
 
 ## Phase map
 
 | # | Phase | Depends on | Deliverable |
 |---|-------|------------|-------------|
-| 1 | Bootstrap repo + project + CI | — | Public GitHub repo `robzilla1738/hangar`, Xcode project, two SPM modules, CI green on push |
-| 2 | Terminal foundation (SwiftTerm pane) | 1 | Empty Hangar window with one working PTY pane running zsh |
-| 3 | Config + hot reload | 1 | JSON5 config at `~/.config/hangar/config.json5` with file-watcher hot reload of theme/font/agent paths |
-| 4 | Multi-pane layout (splits, tabs, projects) | 2, 3 | Splits, tabs, multi-window, projects persisted to SQLite |
-| 5 | Agent profile system | 2, 4 | Auto-detect Claude Code / Codex / Hermes / raw shell on pane spawn; profile metadata applied |
-| 6 | Agent awareness (status + Approval Inbox) | 5 | Status pill per pane, unified Approval Inbox popover, macOS notifications, Cmd-Shift-A hotkey |
-| 7 | Mission Control grid | 6 | Cmd-0 full-window overlay grid of all panes with status, badges, last-3-lines, click-to-focus |
-| 8 | Cost ledger + cost pill | 5 | SQLite cost events, per-profile parsers, title-bar cost pill with breakdown sheet |
-| 9 | Worktree shelf | 4 | Left-sidebar shelf, Cmd-Shift-W creates worktree, click-to-jump pane |
-| 10 | Diff sidecar (FSEvents) | 4 | Right-sidecar live diff via FSEvents per project root |
-| 11 | Polish (Liquid Glass + themes + visuals) | 2-10 | Liquid Glass chrome, 2 built-in themes, empty/loading/error states everywhere, committed screenshots |
-| 12 | Harden (security + a11y + perf) | 1-11 | Keychain integration, hardened-runtime entitlements, VoiceOver pass, cold-launch < 100ms |
-| 13 | Distribute (sign + notarize + release) | 12 | v0.1.0 GitHub release with signed/notarized DMG, Sparkle appcast, Homebrew Cask formula |
+| A | Output wiring + ShellCommandDetector | — | PaneViewModel observes outputStream, feeds parser, publishes detectedAgentID + status; agent badge appears when `claude` runs in a pane |
+| B | Title-bar overlay + AppState registry | A | Custom `WindowOverlayBar` at top of content view showing pane title + model badge (left) + StatusPill (center) + CostPill + ApprovalBell + Mission Control button (right) |
+| C | Approval routing end-to-end | A, B | Approval prompts route to a shared ApprovalInbox; bell badge updates; macOS notification fires; Cmd-Shift-A opens popover; Approve writes `y\n` |
+| D | Cost wiring | A, B | Token-usage regex per profile; PaneViewModel forwards events to AppState.costLedger; CostPill increments live |
+| E | Mission Control (Cmd-0) | A, B | Cmd-0 opens borderless overlay window listing every PaneViewModel across windows; click tile → focus that pane |
+| F | Left sidebar (projects + worktrees) | B | Sidebar wraps content; Cmd-Shift-S toggle; WorktreeShelfView lists current repo's worktrees; Cmd-Shift-W opens new-worktree sheet |
+| G | Right sidecar (diff) | B, F | Right-edge collapsible sidecar wired to FSEventsWatcher on project root; Cmd-Option-D toggle; edits in cwd appear as diff rows |
+| H | Terminal table-stakes | A | Native tabs (Cmd-T), font sizing (Cmd-=/Cmd--), find (Cmd-F), clear (Cmd-K), URL Cmd-click, drag-folder-to-paste, restore-last-state |
+| I | Polish + ship v0.2.0 | A-H | MARKETING_VERSION bump, CHANGELOG, archive+sign+notarize+staple .app+DMG, tag v0.2.0, GitHub release, cask bump to 0.2.0 |
 
 ---
 
-(Detailed phase specs live at `.supergoal/phases/phase-1.md` through `.supergoal/phases/phase-13.md`. Each spec is read by the executor at runtime and contains its own SUPERGOAL_PHASE_START block, Work, Acceptance criteria, Mandatory commands, and Evidence required sections.)
-
----
-
-## Final-phase (Phase 13) coverage
-
-Phase 13 is the "Distribute" phase and **also serves as the Polish & Harden gate** by re-running the full test suite, full lint, performance smoke, and the release-review skill before a tag is cut. If anything regresses, the release does not ship. See `.supergoal/phases/phase-13.md`.
+(Detailed phase specs live at `.supergoal/phases/phase-1.md` through `.supergoal/phases/phase-9.md`.)

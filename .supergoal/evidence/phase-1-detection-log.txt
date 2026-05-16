@@ -1,0 +1,32 @@
+Test Case '-[HangarKitTests.PaneViewModelObservationTests testApprovalPromptCapturedAsItem]' started.
+Test Case '-[HangarKitTests.PaneViewModelObservationTests testApprovalPromptCapturedAsItem]' passed (0.110 seconds).
+Test Case '-[HangarKitTests.PaneViewModelObservationTests testClaudeCommandSetsAgentMetadata]' started.
+Test Case '-[HangarKitTests.PaneViewModelObservationTests testClaudeCommandSetsAgentMetadata]' passed (0.055 seconds).
+Test Case '-[HangarKitTests.PaneViewModelObservationTests testCodexCommandSetsAgentMetadata]' started.
+Test Case '-[HangarKitTests.PaneViewModelObservationTests testCodexCommandSetsAgentMetadata]' passed (0.056 seconds).
+Test Case '-[HangarKitTests.PaneViewModelObservationTests testNonAgentStreamLeavesStateIdle]' started.
+Test Case '-[HangarKitTests.PaneViewModelObservationTests testNonAgentStreamLeavesStateIdle]' passed (0.051 seconds).
+Test Suite 'PaneViewModelObservationTests' passed at 2026-05-16 13:53:15.159.
+Test Suite 'HangarPackageTests.xctest' passed at 2026-05-16 13:53:15.159.
+Test Suite 'Selected tests' passed at 2026-05-16 13:53:15.159.
+✔ Test run with 0 tests in 0 suites passed after 0.001 seconds.
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testDedupesDuplicateCommands]' started.
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testDedupesDuplicateCommands]' passed (0.001 seconds).
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testDetectsClaudeAtZshPercent]' started.
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testDetectsClaudeAtZshPercent]' passed (0.000 seconds).
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testDetectsCodexAtBashDollar]' started.
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testDetectsCodexAtBashDollar]' passed (0.000 seconds).
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testDetectsHermesAtFishChevron]' started.
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testDetectsHermesAtFishChevron]' passed (0.000 seconds).
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testDetectsMultipleCommandsInOneChunk]' started.
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testDetectsMultipleCommandsInOneChunk]' passed (0.000 seconds).
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testHandlesChunksSplitMidLine]' started.
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testHandlesChunksSplitMidLine]' passed (0.000 seconds).
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testIgnoresEnvVarAssignments]' started.
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testIgnoresEnvVarAssignments]' passed (0.000 seconds).
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testIgnoresPlainOutputLines]' started.
+Test Case '-[HangarCoreTests.ShellCommandDetectorTests testIgnoresPlainOutputLines]' passed (0.000 seconds).
+Test Suite 'ShellCommandDetectorTests' passed at 2026-05-16 13:53:16.108.
+Test Suite 'HangarPackageTests.xctest' passed at 2026-05-16 13:53:16.108.
+Test Suite 'Selected tests' passed at 2026-05-16 13:53:16.108.
+✔ Test run with 0 tests in 0 suites passed after 0.001 seconds.
