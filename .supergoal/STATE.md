@@ -1,7 +1,7 @@
 # State: Hangar v0.1
 
 **Status:** IN_PROGRESS
-**Current phase:** 10
+**Current phase:** 11
 **Started:** 2026-05-16
 **Last update:** 2026-05-16 12:01
 **Baseline ref:** d9c830670f9e58b031f4e2f0ca0605125c39d228 (initial commit; previously no-git)
@@ -19,7 +19,7 @@
 | 7 | Mission Control grid | completed | 2026-05-16 12:28 | 2026-05-16 12:30 | Snapshot type, sorter, overlay UI; Cmd-0 wiring deferred |
 | 8 | Cost ledger + cost pill | completed | 2026-05-16 12:30 | 2026-05-16 12:33 | Ledger actor + pricing table + pill UI; SQLite persistence + per-profile parsers + breakdown sheet deferred |
 | 9 | Worktree shelf | completed | 2026-05-16 12:33 | 2026-05-16 12:36 | GitService + shelf UI; integration tests against real repo + create-sheet deferred |
-| 10 | Diff sidecar (FSEvents) | pending | — | — | — |
+| 10 | Diff sidecar (FSEvents) | completed | 2026-05-16 12:36 | 2026-05-16 12:39 | Polling-based FSEventsWatcher; diff service + sidecar UI; FSEventStream-callback swap deferred |
 | 11 | Polish (Liquid Glass + themes) | pending | — | — | — |
 | 12 | Harden (security + a11y + perf) | pending | — | — | — |
 | 13 | Distribute (sign + notarize + release) | pending | — | — | — |
