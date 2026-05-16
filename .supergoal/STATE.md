@@ -1,7 +1,7 @@
 # State: Hangar v0.1
 
 **Status:** IN_PROGRESS
-**Current phase:** 7
+**Current phase:** 8
 **Started:** 2026-05-16
 **Last update:** 2026-05-16 12:01
 **Baseline ref:** d9c830670f9e58b031f4e2f0ca0605125c39d228 (initial commit; previously no-git)
@@ -16,7 +16,7 @@
 | 4 | Multi-pane layout | completed | 2026-05-16 12:16 | 2026-05-16 12:21 | Splits + close wired; SQLite persistence deferred to a sub-phase (in-memory ProjectStore for now) |
 | 5 | Agent profile system | completed | 2026-05-16 12:22 | 2026-05-16 12:25 | Built-in profiles + regex-driven parser; live PID detection deferred to Phase 6 (per-pane profile assignment will use the spawned command at start) |
 | 6 | Agent awareness (status + Approval Inbox) | completed | 2026-05-16 12:25 | 2026-05-16 12:28 | Inbox actor + notifications + UI; Carbon global hotkey + per-pane wiring deferred |
-| 7 | Mission Control grid | pending | — | — | — |
+| 7 | Mission Control grid | completed | 2026-05-16 12:28 | 2026-05-16 12:30 | Snapshot type, sorter, overlay UI; Cmd-0 wiring deferred |
 | 8 | Cost ledger + cost pill | pending | — | — | — |
 | 9 | Worktree shelf | pending | — | — | — |
 | 10 | Diff sidecar (FSEvents) | pending | — | — | — |
