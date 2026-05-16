@@ -44,6 +44,9 @@ jobs:
           swift-format --version
           xcodegen --version
 
+      - name: Download Metal toolchain (Xcode 26 split it out)
+        run: xcodebuild -downloadComponent MetalToolchain || true
+
       - name: Generate Xcode project
         run: xcodegen generate
 
