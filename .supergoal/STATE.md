@@ -1,7 +1,7 @@
 # State: Hangar v0.1
 
 **Status:** IN_PROGRESS
-**Current phase:** 3
+**Current phase:** 4
 **Started:** 2026-05-16
 **Last update:** 2026-05-16 12:01
 **Baseline ref:** d9c830670f9e58b031f4e2f0ca0605125c39d228 (initial commit; previously no-git)
@@ -12,7 +12,7 @@
 |---|-------|--------|---------|-----------|-------|
 | 1 | Bootstrap repo + project + CI | completed | 2026-05-16 11:35 | 2026-05-16 12:01 | Deployment target revised to macOS 15 (CI constraint); CI green on macos-15 |
 | 2 | Terminal foundation (SwiftTerm pane) | completed | 2026-05-16 12:02 | 2026-05-16 12:11 | SwiftTerm-owned PTY; standalone PTYProcess deferred to v0.2 (libghostty swap) |
-| 3 | Config + hot reload | pending | — | — | — |
+| 3 | Config + hot reload | completed | 2026-05-16 12:11 | 2026-05-16 12:16 | JSON5 via JSONSerialization.json5Allowed; watcher works on atomic writes (macOS 26 verified) |
 | 4 | Multi-pane layout | pending | — | — | — |
 | 5 | Agent profile system | pending | — | — | — |
 | 6 | Agent awareness (status + Approval Inbox) | pending | — | — | — |

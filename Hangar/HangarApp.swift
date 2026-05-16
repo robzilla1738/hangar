@@ -8,6 +8,7 @@ import SwiftUI
 @main
 struct HangarApp: App {
     @State private var appState = AppState()
+    @FocusedValue(\.windowViewModel) private var focusedWindow: WindowViewModel?
 
     var body: some Scene {
         WindowGroup("Hangar", id: "main") {
@@ -24,14 +25,43 @@ struct HangarApp: App {
             }
             CommandGroup(replacing: .newItem) {
                 Button("New Window") {
-                    NSApp.sendAction(#selector(NSApplication.newWindowForTab(_:)), to: nil, from: nil)
+                    openNewWindow()
                 }
                 .keyboardShortcut("n", modifiers: [.command])
+            }
+            CommandMenu("View") {
+                Button("Split Horizontally") {
+                    focusedWindow?.splitActive(orientation: .horizontal)
+                }
+                .keyboardShortcut("d", modifiers: [.command])
+                .disabled(focusedWindow == nil)
+
+                Button("Split Vertically") {
+                    focusedWindow?.splitActive(orientation: .vertical)
+                }
+                .keyboardShortcut("d", modifiers: [.command, .shift])
+                .disabled(focusedWindow == nil)
+
+                Divider()
+
+                Button("Close Pane") {
+                    focusedWindow?.closeActive()
+                }
+                .keyboardShortcut("w", modifiers: [.command])
+                .disabled(focusedWindow == nil)
             }
         }
 
         Settings {
             SettingsView(config: appState.config)
+        }
+    }
+
+    private func openNewWindow() {
+        // SwiftUI's WindowGroup handles Cmd-N via the default newItem command;
+        // we replaced .newItem to ensure both the menu and shortcut work.
+        if let url = URL(string: "hangar://new-window") {
+            NSWorkspace.shared.open(url)
         }
     }
 }

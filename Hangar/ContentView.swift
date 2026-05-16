@@ -1,16 +1,28 @@
-// Hangar — content shell. Phase 2 wires a single TerminalPaneView.
+// Hangar — content shell. Phase 4 wires WindowRootView with splittable panes.
 
 import HangarCore
 import HangarKit
 import SwiftUI
 
 struct ContentView: View {
-    @State private var paneViewModel = PaneViewModel()
+    @State private var windowViewModel = WindowViewModel()
 
     var body: some View {
-        TerminalPaneView(viewModel: paneViewModel)
-            .background(.windowBackground)
+        WindowRootView(viewModel: windowViewModel)
             .ignoresSafeArea()
+            .focusedSceneValue(\.windowViewModel, windowViewModel)
+    }
+}
+
+/// FocusedSceneValue plumbing so Commands can reach the active window's view model.
+struct WindowViewModelFocusKey: FocusedValueKey {
+    typealias Value = WindowViewModel
+}
+
+extension FocusedValues {
+    var windowViewModel: WindowViewModel? {
+        get { self[WindowViewModelFocusKey.self] }
+        set { self[WindowViewModelFocusKey.self] = newValue }
     }
 }
 
